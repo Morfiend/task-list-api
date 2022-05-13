@@ -25,13 +25,29 @@ def create_task():
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_query = request.args.get("sort")
+    sort_id_query = request.args.get("sort-id")
+    title_query = request.args.get("title")
 
-    if sort_query:
+    if sort_query and title_query:
+        if sort_query == "asc":
+            tasks = Task.query.filter(
+                Task.title.ilike(f"%{title_query}%")).order_by(Task.title)
+        elif sort_query == "desc":
+            tasks = Task.query.filter(
+                Task.title.ilike(f"%{title_query}%")).order_by(
+                    Task.title.desc())
+    elif sort_query or title_query:
         if sort_query == "asc":
             tasks = Task.query.order_by(Task.title)
         elif sort_query == "desc":
             tasks = Task.query.order_by(Task.title.desc())
-
+        elif title_query:
+            tasks = Task.query.filter(Task.title.ilike(f"%{title_query}%"))
+    elif sort_id_query:
+        if sort_id_query == "asc":
+            tasks = Task.query.order_by(Task.task_id)
+        elif sort_id_query == "desc":
+            tasks = Task.query.order_by(Task.task_id.desc())
     else:
         tasks = Task.query.all()
 
